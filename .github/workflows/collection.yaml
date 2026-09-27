@@ -14,9 +14,42 @@ on:
 
 
 jobs:
+  lint-and-test:
+    name: "Lint and test collection"
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and ansible-lint
+        run: python -m pip install ansible-core ansible-lint
+
+      - name: Lint
+        run: ansible-lint
+
+      - name: Build and install collection
+        run: |
+          mkdir -p "$RUNNER_TEMP/collection-dist" "$RUNNER_TEMP/collections"
+          ansible-galaxy collection build --output-path "$RUNNER_TEMP/collection-dist"
+          artifact="$(find "$RUNNER_TEMP/collection-dist" -name '*.tar.gz' -print -quit)"
+          ansible-galaxy collection install "$artifact" \
+            --collections-path "$RUNNER_TEMP/collections"
+
+      - name: Check example playbook syntax
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ runner.temp }}/collections:/home/runner/.ansible/collections:/usr/share/ansible/collections
+        run: ansible-playbook -i 'localhost,' --syntax-check playbooks/install.yml
+
   release:
     name: "Release with Commitizen"
     runs-on: [ubuntu-24.04]
+    needs: lint-and-test
     if: >-
       github.event_name == 'push' &&
       (
