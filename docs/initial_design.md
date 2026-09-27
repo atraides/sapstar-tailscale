@@ -4,7 +4,7 @@
 
 - Namespace: `sapstar`
 - Collection: `tailscale`
-- Primary role: `tailscale`
+- Primary role: `deploy`
 
 ## Initial scope
 
@@ -12,14 +12,13 @@
 - Install method: official Tailscale APT repositories
 - Role responsibilities:
   - Install Tailscale package
-  - Enable/start `tailscaled`
+
+## Out of scope for the first skeleton
+
 - Module responsibilities:
   - Gather status data from installed clients
   - Gather assigned Tailscale IP addresses
   - Apply selected client settings through `tailscale set`
-
-## Out of scope for the first skeleton
-
 - Non-Debian package managers
 - Authentication/login workflow with auth keys or OAuth clients
 - Tailnet API management
