@@ -27,8 +27,8 @@
         suites: "{{ ansible_facts.distribution_release }}"
         components: main
         architectures: " {{ deploy_dpkg_arch.stdout }}"
-        signed_by: "{{ ssncfg_tailscale_aptkey_url }}"
-      notify: ssnhnd_force_update_apt_cache
+        signed_by: "{{ deploy_aptkey_url }}"
+      notify: deploy_force_update_apt_cache
 
     - name: Flush handlers before package install
       ansible.builtin.meta: flush_handlers
@@ -37,6 +37,6 @@
   become: true
   become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
   ansible.builtin.package:
-    name: "tailscale{{ '=' + ssncfg_tailscale_package_version if ssncfg_tailscale_package_version | length > 0 else '' }}"
+    name: "tailscale{{ '=' + deploy_package_version if deploy_package_version | length > 0 else '' }}"
     state: present
     allow_downgrade: false
