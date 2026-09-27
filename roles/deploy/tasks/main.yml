@@ -1,4 +1,7 @@
 ---
+- name: Load variables
+  ansible.builtin.include_tasks: load_variables.yml
+
 - name: Validate supported platform
   ansible.builtin.assert:
     that:
