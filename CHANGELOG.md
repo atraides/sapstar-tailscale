@@ -1,3 +1,10 @@
+## v0.2.4 (2026-09-27)
+
+### Fix
+
+- **deploy**: Incorrect package base variable
+- **deploy**: Add support back to raspbian detection
+
 ## v0.2.3 (2026-09-27)
 
 ### Fix
