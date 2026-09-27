@@ -1,3 +1,9 @@
+## v0.2.6 (2026-09-27)
+
+### Fix
+
+- **deploy**: Revert the addition of raspbian repository
+
 ## v0.2.5 (2026-09-27)
 
 ### Fix
