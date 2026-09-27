@@ -1,3 +1,9 @@
+## v0.2.5 (2026-09-27)
+
+### Fix
+
+- **deploy**: Fix incorrect version pinning
+
 ## v0.2.4 (2026-09-27)
 
 ### Fix
