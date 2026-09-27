@@ -9,6 +9,6 @@
 
 # OS dependent variables for Ubuntu Jammy Jellyfish
 ---
-ssncfg_apt_packages:
+deploy_apt_packages:
   - ca-certificates
   - python3-apt
