@@ -1,3 +1,10 @@
+## v0.2.2 (2026-09-27)
+
+### Fix
+
+- **deploy**: Update incorrect variable names to use the new standard
+- **deploy**: Add missing package list to all supported OS
+
 ## v0.2.1 (2026-09-27)
 
 ### Fix
