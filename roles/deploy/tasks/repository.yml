@@ -37,6 +37,6 @@
   become: true
   become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
   ansible.builtin.package:
-    name: "tailscale{{ '=' + deploy_package_version if deploy_package_version | length > 0 else '' }}"
+    name: "tailscale{{ '=' + deploy_package_version if deploy_package_version else '' }}"
     state: present
     allow_downgrade: false
