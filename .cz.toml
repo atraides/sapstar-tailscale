@@ -1,6 +1,6 @@
 [tool.commitizen]
 annotated_tag = true
-gpg_sign = true
+gpg_sign = false
 name = "cz_conventional_commits"
 tag_format = "v$version"
 version_scheme = "semver"
