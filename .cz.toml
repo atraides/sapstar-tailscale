@@ -1,0 +1,9 @@
+[tool.commitizen]
+annotated_tag = true
+gpg_sign = true
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "semver"
+version = "0.1.0"
+update_changelog_on_bump = true
+version_files = ["galaxy.yml:version"]

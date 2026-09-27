@@ -1,0 +1,6 @@
+---
+- name: Install Tailscale
+  hosts: linux
+  become: true
+  roles:
+    - role: sapstar.tailscale.deploy

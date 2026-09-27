@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  role_name: tailscale
+  author: Sapstar
+  description: Install Tailscale and manage the tailscaled service.
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - tailscale
+    - vpn
+    - networking
+    - linux
+dependencies: []

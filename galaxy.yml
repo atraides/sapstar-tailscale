@@ -1,0 +1,25 @@
+namespace: sapstar
+name: tailscale
+version: 0.1.0
+readme: README.md
+authors:
+  - Sapstar
+description: Install, inspect, and configure Tailscale on Linux systems.
+license:
+  - MIT
+tags:
+  - tailscale
+  - vpn
+  - networking
+  - linux
+  - system
+dependencies: {}
+repository: https://example.invalid/sapstar/tailscale
+documentation: https://example.invalid/sapstar/tailscale
+homepage: https://example.invalid/sapstar/tailscale
+issues: https://example.invalid/sapstar/tailscale/issues
+build_ignore:
+  - .gitignore
+  - .ansible
+  - .venv
+  - venv

@@ -1,0 +1,42 @@
+---
+- name: Install APT HTTPS prerequisites
+  ansible.builtin.apt:
+    name: "{{ install_required_apt_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure the correct APT repository is added
+  become: true
+  become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
+  when: >
+    ansible_distribution | lower == "ubuntu"
+    or ansible_distribution | lower == "debian"
+  block:
+    - name: Collect dpkg architecture of the system
+      changed_when: false
+      register: deploy_dpkg_arch
+      ansible.builtin.command:
+        cmd: "dpkg --print-architecture"
+
+    - name: Ensure the Tailscale APT repository is registered
+      ansible.builtin.deb822_repository:
+        name: tailscale
+        types: deb
+        uris: "{{ tailscale_pkg_base }}"
+        suites: "{{ ansible_facts.distribution_release }}"
+        components: main
+        architectures: " {{ deploy_dpkg_arch.stdout }}"
+        signed_by: "{{ ssncfg_tailscale_aptkey_url }}"
+      notify: ssnhnd_force_update_apt_cache
+
+    - name: Flush handlers before package install
+      ansible.builtin.meta: flush_handlers
+
+- name: Install Tailscale
+  become: true
+  become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
+  ansible.builtin.package:
+    name: "tailscale{{ '=' + ssncfg_tailscale_package_version if ssncfg_tailscale_package_version | length > 0 else '' }}"
+    state: present
+    allow_downgrade: false

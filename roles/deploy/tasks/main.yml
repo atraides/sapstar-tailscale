@@ -1,0 +1,17 @@
+---
+- name: Validate supported platform
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == 'Debian'
+      - ansible_distribution_release is defined
+    fail_msg: >-
+      The sapstar.tailscale.install role currently supports Debian/Ubuntu
+      hosts with a detected distribution codename.
+
+- name: Configure the signed Tailscale repository and package
+  ansible.builtin.include_tasks: repository.yml
+  args:
+    apply:
+      become: true
+      become_exe: >-
+        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({})) else 'sudo' }}

@@ -1,0 +1,116 @@
+---
+name: "CI • SAPstar Tailscale Collection"
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - release/*
+  workflow_dispatch:
+
+
+jobs:
+  release:
+    name: "Release with Commitizen"
+    runs-on: [ubuntu-24.04]
+    if: >-
+      github.event_name == 'push' &&
+      (
+        github.ref == 'refs/heads/main' ||
+        startsWith(github.ref, 'refs/heads/release/')
+      ) &&
+      !startsWith(github.event.head_commit.message, 'bump:')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout (full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: prerelease
+        name: Detect prerelease name
+        if: "${{ startsWith(github.ref, 'refs/heads/release/') }}"
+        shell: bash
+        run: |
+          REF="${GITHUB_REF#refs/heads/}"
+          if [[ "$REF" == release/* ]]; then
+            PRE="${REF#release/}"
+            echo "REPOSITORY_PRE_RELEASE=$PRE" >> "$GITHUB_ENV"
+            echo "REPOSITORY_PRE_RELEASE=$PRE" >> "$GITHUB_OUTPUT"
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "Detected prerelease: $PRE"
+          fi
+
+      - id: cz_pre
+        name: Bump pre-release version and create CHANGELOG
+        uses: commitizen-tools/commitizen-action@338bbd841b75aaee6bf5340e1fa12f6ab58ff9ff
+        if: "${{ startsWith(github.ref, 'refs/heads/release/') }}"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: ${{ steps.prerelease.outputs.REPOSITORY_PRE_RELEASE }}
+
+      - id: cz_prod
+        name: Bump production release version and create CHANGELOG
+        uses: commitizen-tools/commitizen-action@338bbd841b75aaee6bf5340e1fa12f6ab58ff9ff
+        if: "${{ github.ref == 'refs/heads/main' }}"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print Version
+        run: echo "Bumped to version ${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}"
+
+      - name: Detect tag created at HEAD
+        id: detect_tag
+        shell: bash
+        run: |
+          TAG_CREATED="$(git tag --points-at HEAD | head -n1 || true)"
+          if [ -n "$TAG_CREATED" ]; then
+            echo "tag=$TAG_CREATED" >> "$GITHUB_OUTPUT"
+            echo "Detected release tag at HEAD: $TAG_CREATED"
+          else
+            echo "No tag at HEAD; skipping release creation."
+          fi
+
+      - name: Extract release notes from CHANGELOG (best-effort)
+        id: changelog
+        if: steps.detect_tag.outputs.tag != ''
+        shell: bash
+        run: |
+          TAG="${{ steps.detect_tag.outputs.tag }}"
+          # Try to extract section for the detected tag; fall back to full changelog.
+          if grep -q "^## .*${TAG}" CHANGELOG.md; then
+            # Print lines from the tag header until the next "## " header (exclusive)
+            awk -v tag="## " -v current="${TAG}" '
+              index($0, "## " current) == 1 {p=1; print; next}
+              p && index($0, tag) == 1 {p=0}
+              p
+              ' CHANGELOG.md > RELEASE_NOTES.md || cp CHANGELOG.md RELEASE_NOTES.md
+          else
+            cp CHANGELOG.md RELEASE_NOTES.md
+          fi
+          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
+
+      - name: Build collection
+        if: steps.cz_pre.outputs.version != '' || steps.cz_prod.outputs.version != ''
+        run: |
+          python3 -m pip install ansible-core
+          mkdir -p dist
+          ansible-galaxy collection build --output-path dist
+
+      - name: Create GitHub Release
+        if: steps.cz_pre.outputs.version != '' || steps.cz_prod.outputs.version != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}
+          name: v${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          prerelease: ${{ steps.prerelease.outputs.is_prerelease == 'true' }}
+          files: dist/sapstar-tailscale-${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

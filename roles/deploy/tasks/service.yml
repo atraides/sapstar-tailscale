@@ -1,0 +1,7 @@
+---
+- name: Manage tailscaled systemd service
+  ansible.builtin.systemd:
+    name: "{{ tailscale_service_name }}"
+    enabled: "{{ tailscale_service_enabled }}"
+    state: "{{ tailscale_service_state }}"
+    daemon_reload: true
