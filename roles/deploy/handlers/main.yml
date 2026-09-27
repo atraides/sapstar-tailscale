@@ -1,0 +1,8 @@
+---
+- name: Force Update APT Cache
+  become: true
+  become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
+  listen: deploy_force_update_apt_cache
+  ansible.builtin.apt:
+    update_cache: true
+  register: deploy_apt_update_out
