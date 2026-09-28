@@ -1,3 +1,17 @@
+## v0.3.0 (2026-09-28)
+
+### Feat
+
+- **config**: Allow gathering the current configuration for Tailscale
+- **dev**: Add pyright configuration to detect local Ansible modules
+- **status**: Add status ansible module to allow querying tailscale status
+- **status**: Add initial utilities to work with the tailscale binary
+
+### Fix
+
+- **git**: Remove pyright configuration from gitignore
+- **git**: Update gitignore to include python files and directories
+
 ## v0.2.6 (2026-09-27)
 
 ### Fix
