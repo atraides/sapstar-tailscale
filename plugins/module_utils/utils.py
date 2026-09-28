@@ -111,3 +111,42 @@ class TailscaleInstance:
             snat_subnet_routes=config_data.get("snat-subnet-routes", False),
             update_check=config_data.get("update-check", False),
         )
+
+    def enroll_machine(self, auth_key: str) -> dict[str, list[object] | list[str]]:
+        """Enroll the machine with the given auth key."""
+        # `tailscale up --json` writes one JSON object for each state change.
+        # In particular, it can write a NeedsMachineAuth object followed by a
+        # Running object. It can also append human-readable warnings, so the
+        # output is a mixed stream rather than one JSON document suitable for
+        # json.loads().
+        result = self.run("up", f"--auth-key={auth_key}", "--json")
+        decoder = json.JSONDecoder()
+        json_results: list[object] = []
+        plain_results: list[str] = []
+        offset = 0
+
+        while offset < len(result):
+            while offset < len(result) and result[offset].isspace():
+                offset += 1
+            if offset == len(result):
+                break
+
+            try:
+                document, next_offset = decoder.raw_decode(result, offset)
+            except json.JSONDecodeError:
+                # Tailscale may write a human-readable warning to stdout even
+                # when --json was requested. Keep that output instead of
+                # treating it as a module failure.
+                line_end = result.find("\n", offset)
+                if line_end == -1:
+                    line_end = len(result)
+                plain_result = result[offset:line_end].strip()
+                if plain_result:
+                    plain_results.append(plain_result)
+                offset = line_end + 1
+                continue
+
+            json_results.append(document)
+            offset = next_offset
+
+        return {"json_results": json_results, "plain_results": plain_results}
