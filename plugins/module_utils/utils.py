@@ -23,7 +23,6 @@ class BackendState(Enum):
 
 @dataclass
 class TailscaleNode:
-    id: str | None = None
     hostname: str | None = None
     online: bool = False
 
@@ -34,6 +33,16 @@ class TailscaleStatus:
     backend_state: BackendState = BackendState.NoState
     health: list[str] | None = None
     self_node: TailscaleNode | None = None
+
+
+@dataclass
+class TailscaleConfig:
+    accept_dns: bool = False
+    accept_routes: bool = False
+    advertise_routes: list[str] | None = None
+    auto_update: bool = False
+    snat_subnet_routes: bool = False
+    update_check: bool = False
 
 
 def get_tailscale_binary() -> Path:
@@ -84,4 +93,21 @@ class TailscaleInstance:
             backend_state=backend_state,
             health=health,
             self_node=self_node,
+        )
+
+    def get_config(self) -> TailscaleConfig:
+        try:
+            result = self.run("get", "--json")
+        except CalledProcessError as e:
+            raise TailscaleError(
+                f"Tailscale get command failed: {e.stderr.strip()}"
+            ) from e
+
+        config_data = json.loads(result)
+        return TailscaleConfig(
+            accept_dns=config_data.get("accept-dns", False),
+            accept_routes=config_data.get("accept-routes", False),
+            advertise_routes=config_data.get("advertise-routes", []),
+            snat_subnet_routes=config_data.get("snat-subnet-routes", False),
+            update_check=config_data.get("update-check", False),
         )

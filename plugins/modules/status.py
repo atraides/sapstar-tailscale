@@ -96,14 +96,14 @@ status:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.sapstar.tailscale.plugins.module_utils.utils import (
-    TailscaleInstance,
     TailscaleError,
+    TailscaleInstance,
 )
 
 
 def run_module():
     module_args = {"binary": {"type": "str", "required": False}}
-    result = {"changed": False, "status": None}
+    result = {"changed": False, "status": None, "config": None}
 
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
     tailscale = TailscaleInstance()
@@ -116,7 +116,16 @@ def run_module():
             "health": status.health,
             "self_node": status.self_node.__dict__ if status.self_node else None,
         }
-    except TailscaleError as e:
+        config = tailscale.get_config()
+        result["config"] = {
+            "accept_dns": config.accept_dns,
+            "accept_routes": config.accept_routes,
+            "advertise_routes": config.advertise_routes,
+            "auto_update": config.auto_update,
+            "snat_subnet_routes": config.snat_subnet_routes,
+            "update_check": config.update_check,
+        }
+    except TailscaleError:
         module.fail_json(msg="Something wrong happened", **result)
 
     if module.check_mode:
