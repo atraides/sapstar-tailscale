@@ -1,0 +1,11 @@
+{
+  "include": ["plugins"],
+  "exclude": [".ansible", ".git"],
+  "typeCheckingMode": "basic",
+  "executionEnvironments": [
+    {
+      "root": "plugins",
+      "extraPaths": [".ansible/collections"]
+    }
+  ]
+}
