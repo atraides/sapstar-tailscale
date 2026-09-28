@@ -18,6 +18,27 @@ This collection currently provides:
 - The `tailscale` CLI must be installed before using the info/configuration modules. Use the included role for this.
 - Configuration modules operate on the local installed Tailscale client and usually require privilege escalation.
 
+For local module development, install Ansible Core in the Python environment selected by
+`.python-version` (or activate the environment used by your editor):
+
+```bash
+python -m pip install ansible-core
+```
+
+Pyright is configured by [`pyrightconfig.json`](pyrightconfig.json). It expects the
+collection to be installed below `.ansible/collections` so fully-qualified imports such
+as `ansible_collections.sapstar.tailscale.plugins.module_utils` resolve in Neovim:
+
+```bash
+mkdir -p .ansible/collection-dist .ansible/collections
+ansible-galaxy collection build --output-path .ansible/collection-dist
+ansible-galaxy collection install \
+  "$(find .ansible/collection-dist -name '*.tar.gz' -print -quit)" \
+  --collections-path .ansible/collections --force
+```
+
+Repeat the build/install command after changing `plugins/` or `module_utils/` files.
+
 ## Installation
 
 From a built collection artifact:
