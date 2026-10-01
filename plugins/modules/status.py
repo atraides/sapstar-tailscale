@@ -98,6 +98,7 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.sapstar.tailscale.plugins.module_utils.utils import (
     TailscaleError,
     TailscaleInstance,
+    as_result_data,
 )
 
 
@@ -110,21 +111,8 @@ def run_module():
 
     try:
         status = tailscale.get_status()
-        result["status"] = {
-            "version": status.version,
-            "backend_state": status.backend_state.name,
-            "health": status.health,
-            "self_node": status.self_node.__dict__ if status.self_node else None,
-        }
-        config = tailscale.get_config()
-        result["config"] = {
-            "accept_dns": config.accept_dns,
-            "accept_routes": config.accept_routes,
-            "advertise_routes": config.advertise_routes,
-            "auto_update": config.auto_update,
-            "snat_subnet_routes": config.snat_subnet_routes,
-            "update_check": config.update_check,
-        }
+        result["status"] = as_result_data(status)
+        result["config"] = as_result_data(tailscale.config)
     except TailscaleError:
         module.fail_json(msg="Something wrong happened", **result)
 

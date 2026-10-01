@@ -1,10 +1,11 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field, fields, is_dataclass
 from enum import Enum
 from pathlib import Path
 from shutil import which
 from subprocess import CalledProcessError
 from subprocess import run as run_command
+from typing import Any
 
 
 class TailscaleError(Exception):
@@ -39,10 +40,33 @@ class TailscaleStatus:
 class TailscaleConfig:
     accept_dns: bool = False
     accept_routes: bool = False
-    advertise_routes: list[str] | None = None
+    advertise_routes: list[str] = field(default_factory=list)
     auto_update: bool = False
     snat_subnet_routes: bool = False
     update_check: bool = False
+
+
+def as_result_data(value: Any) -> Any:
+    """Convert dataclass models into Ansible/JSON-friendly result data."""
+    if is_dataclass(value) and not isinstance(value, type):
+        return {
+            dataclass_field.name: as_result_data(getattr(value, dataclass_field.name))
+            for dataclass_field in fields(value)
+        }
+
+    if isinstance(value, Enum):
+        return value.name
+
+    if isinstance(value, list):
+        return [as_result_data(item) for item in value]
+
+    if isinstance(value, tuple):
+        return [as_result_data(item) for item in value]
+
+    if isinstance(value, dict):
+        return {key: as_result_data(item) for key, item in value.items()}
+
+    return value
 
 
 def get_tailscale_binary() -> Path:
@@ -58,8 +82,31 @@ class TailscaleInstance:
 
     def __init__(self, binary: Path | None = None):
         self.binary = get_tailscale_binary()  # Default to the system binary
+        self._config = TailscaleConfig()
+
         if isinstance(binary, Path):
             self.binary = binary
+        self.update_config()
+
+    @property
+    def config(self) -> TailscaleConfig:
+        return self._config
+
+    def get_config_dict(self) -> dict[str, Any]:
+        return as_result_data(self.config)
+
+    def get_config_diff(self, desired_config: dict[str, Any]) -> dict[str, Any]:
+        """Return desired config values that differ from the current config."""
+        current_config = as_result_data(self.config)
+        normalized_config = {
+            key.replace("-", "_"): value for key, value in desired_config.items()
+        }
+
+        return {
+            key: value
+            for key, value in normalized_config.items()
+            if key in current_config and current_config[key] != value
+        }
 
     def run(self, *args: str) -> str:
         """Run the Tailscale command with the given arguments."""
@@ -95,7 +142,7 @@ class TailscaleInstance:
             self_node=self_node,
         )
 
-    def get_config(self) -> TailscaleConfig:
+    def update_config(self, force: bool = False) -> None:
         try:
             result = self.run("get", "--json")
         except CalledProcessError as e:
@@ -104,10 +151,11 @@ class TailscaleInstance:
             ) from e
 
         config_data = json.loads(result)
-        return TailscaleConfig(
+        advertise_routes = config_data.get("advertise-routes", "")
+        self._config = TailscaleConfig(
             accept_dns=config_data.get("accept-dns", False),
             accept_routes=config_data.get("accept-routes", False),
-            advertise_routes=config_data.get("advertise-routes", []),
+            advertise_routes=advertise_routes.split(",") if advertise_routes else [],
             snat_subnet_routes=config_data.get("snat-subnet-routes", False),
             update_check=config_data.get("update-check", False),
         )

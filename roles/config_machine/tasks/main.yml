@@ -1,0 +1,21 @@
+---
+- name: Load variables
+  ansible.builtin.include_tasks: load_variables.yml
+
+- name: Validate supported platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["os_family"] == 'Debian'
+      - ansible_facts["distribution_release"] is defined
+    fail_msg: >-
+      The sapstar.tailscale.install role currently supports Debian/Ubuntu
+      hosts with a detected distribution codename.
+
+- name: Configure Tailscale
+  sapstar.tailscale.config:
+    accept_dns: true
+  register: config_machine_out
+
+- name: Debug Configure Output
+  ansible.builtin.debug:
+    var: config_machine_out

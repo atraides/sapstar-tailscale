@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  role_name: config_machine
+  author: SAPstar
+  description: Configure Tailscale on Target Machine
+  license: MIT
+  min_ansible_version: "2.19"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags:
+    - tailscale
+    - vpn
+    - networking
+    - linux
+dependencies: []
