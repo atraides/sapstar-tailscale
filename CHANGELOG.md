@@ -1,3 +1,10 @@
+## v0.5.0 (2026-10-01)
+
+### Feat
+
+- **config**: apply requested Tailscale settings
+- **config**: add Tailscale config module
+
 ## v0.4.0 (2026-10-01)
 
 ### Feat
