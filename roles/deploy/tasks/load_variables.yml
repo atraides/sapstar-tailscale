@@ -12,8 +12,10 @@
 - name: Load variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
-    - "os/{{ ansible_distribution }}/{{ ansible_distribution_release }}.yml"
-    - "os/{{ ansible_distribution }}.yml"
-    - "os/{{ ansible_os_family }}.yml"
-    - "os/{{ ansible_system }}.yml"
+    - >-
+      {{ 'os/' ~ ansible_facts['distribution'] ~ '/' ~
+      ansible_facts['distribution_release'] ~ '.yml' }}
+    - "os/{{ ansible_facts['distribution'] }}.yml"
+    - "os/{{ ansible_facts['os_family'] }}.yml"
+    - "os/{{ ansible_facts['system'] }}.yml"
     - "os/default.yml"
