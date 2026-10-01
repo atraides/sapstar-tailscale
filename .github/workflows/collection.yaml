@@ -138,7 +138,7 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.cz_pre.outputs.version != '' || steps.cz_prod.outputs.version != ''
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}
           name: v${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}
