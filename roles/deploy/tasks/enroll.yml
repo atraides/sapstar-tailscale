@@ -10,8 +10,4 @@
         else 'sudo' }}
       sapstar.tailscale.enroll:
         authkey: "{{ deploy_enroll_key }}"
-      register: tailscale_enroll_out
-
-    - name: Show enroll result
-      ansible.builtin.debug:
-        var: tailscale_enroll_out
+      register: deploy_enroll_out
