@@ -43,8 +43,10 @@ jobs:
 
       - name: Check example playbook syntax
         env:
-          ANSIBLE_COLLECTIONS_PATH: ${{ runner.temp }}/collections:/home/runner/.ansible/collections:/usr/share/ansible/collections
-        run: ansible-playbook -i 'localhost,' --syntax-check playbooks/install.yml
+          COLLECTIONS_PATH: /home/runner/.ansible/collections:/usr/share/ansible/collections
+        run: >-
+          ANSIBLE_COLLECTIONS_PATH="${{ runner.temp }}/collections:$COLLECTIONS_PATH"
+          ansible-playbook -i 'localhost,' --syntax-check playbooks/install.yml
 
   release:
     name: "Release with Commitizen"
@@ -138,7 +140,7 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.cz_pre.outputs.version != '' || steps.cz_prod.outputs.version != ''
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}
           name: v${{ steps.cz_pre.outputs.version || steps.cz_prod.outputs.version }}
