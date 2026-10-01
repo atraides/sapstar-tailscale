@@ -99,7 +99,9 @@ class TailscaleInstance:
         """Return desired config values that differ from the current config."""
         current_config = as_result_data(self.config)
         normalized_config = {
-            key.replace("-", "_"): value for key, value in desired_config.items()
+            key.replace("-", "_"): value
+            for key, value in desired_config.items()
+            if value is not None
         }
 
         return {
@@ -107,6 +109,25 @@ class TailscaleInstance:
             for key, value in normalized_config.items()
             if key in current_config and current_config[key] != value
         }
+
+    def set_config(self, desired_config: dict[str, Any]) -> dict[str, Any]:
+        """Apply only explicitly requested settings that differ from the current state."""
+        config_diff = self.get_config_diff(desired_config)
+        if not config_diff:
+            return config_diff
+
+        args = ["set"]
+        for key, value in config_diff.items():
+            option = key.replace("_", "-")
+            if isinstance(value, bool):
+                value = str(value).lower()
+            elif isinstance(value, list):
+                value = ",".join(value)
+            args.append(f"--{option}={value}")
+
+        self.run(*args)
+        self.update_config()
+        return config_diff
 
     def run(self, *args: str) -> str:
         """Run the Tailscale command with the given arguments."""
@@ -156,6 +177,7 @@ class TailscaleInstance:
             accept_dns=config_data.get("accept-dns", False),
             accept_routes=config_data.get("accept-routes", False),
             advertise_routes=advertise_routes.split(",") if advertise_routes else [],
+            auto_update=config_data.get("auto-update", False),
             snat_subnet_routes=config_data.get("snat-subnet-routes", False),
             update_check=config_data.get("update-check", False),
         )
