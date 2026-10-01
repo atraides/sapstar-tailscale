@@ -1,3 +1,16 @@
+## v0.4.0 (2026-10-01)
+
+### Feat
+
+- **enroll**: Add tasks necessary to enroll the machine if an auth_key present
+- **install**: Separate the install task from repository management
+- **enroll**: Add support for machine enrollment
+
+### Fix
+
+- **enroll**: Fix incorrect variable name for enrollment output
+- **apt**: Streamline variable names to better match intent
+
 ## v0.3.0 (2026-09-28)
 
 ### Feat
