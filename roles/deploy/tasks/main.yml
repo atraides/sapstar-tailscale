@@ -28,3 +28,6 @@
       become_exe: >-
         {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
         else 'sudo' }}
+
+- name: Enroll to Tailscale
+  ansible.builtin.include_tasks: enroll.yml
