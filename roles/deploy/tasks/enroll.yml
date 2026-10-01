@@ -1,0 +1,13 @@
+---
+- name: Enroll local machine to Tailscale
+  when: >
+    deploy_enroll_key is defined
+  block:
+    - name: Enroll machine to Tailscale
+      become: true
+      become_exe: >-
+        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
+        else 'sudo' }}
+      sapstar.tailscale.enroll:
+        authkey: "{{ deploy_enroll_key }}"
+      register: deploy_enroll_out

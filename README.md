@@ -100,7 +100,7 @@ Apply selected local settings:
 
 ## Role variables
 
-See [`roles/tailscale/README.md`](roles/tailscale/README.md).
+See [`roles/deploy/README.md`](roles/deploy/README.md).
 
 ## Example playbooks
 
