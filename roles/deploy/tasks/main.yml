@@ -17,4 +17,14 @@
     apply:
       become: true
       become_exe: >-
-        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({})) else 'sudo' }}
+        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
+        else 'sudo' }}
+
+- name: Install the Tailscale package
+  ansible.builtin.include_tasks: install.yml
+  args:
+    apply:
+      become: true
+      become_exe: >-
+        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
+        else 'sudo' }}

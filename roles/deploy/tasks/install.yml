@@ -1,0 +1,12 @@
+---
+- name: Install Tailscale
+  become: true
+  become_exe: >-
+    {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({})) else
+    'sudo' }}
+  ansible.builtin.package:
+    name: >-
+      tailscale{{ '=' + deploy_package_version if deploy_package_version else
+      '' }}
+    state: present
+    allow_downgrade: false

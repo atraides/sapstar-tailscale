@@ -8,10 +8,12 @@
 
 - name: Ensure the correct APT repository is added
   become: true
-  become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
+  become_exe: >-
+    {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({})) else
+    'sudo' }}
   when: >
-    ansible_distribution | lower == "ubuntu"
-    or ansible_distribution | lower == "debian"
+    ansible_facts["distribution"] | lower == "ubuntu"
+    or ansible_facts["distribution"] | lower == "debian"
   block:
     - name: Collect dpkg architecture of the system
       changed_when: false
@@ -32,11 +34,3 @@
 
     - name: Flush handlers before package install
       ansible.builtin.meta: flush_handlers
-
-- name: Install Tailscale
-  become: true
-  become_exe: "{{ 'sudo.ws' if ansible_facts.packages['sudo-rs'] is defined else 'sudo' }}"
-  ansible.builtin.package:
-    name: "tailscale{{ '=' + deploy_package_version if deploy_package_version else '' }}"
-    state: present
-    allow_downgrade: false
