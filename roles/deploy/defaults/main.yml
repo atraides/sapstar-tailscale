@@ -2,5 +2,10 @@
 deploy_package_version: null
 deploy_raspbian: false
 deploy_channel: stable
-deploy_pkg_base: "https://pkgs.tailscale.com/{{ deploy_channel }}/{{ ansible_facts.distribution | lower }}"
-deploy_aptkey_url: "{{ deploy_pkg_base }}/{{ ansible_facts.distribution_release }}.noarmor.gpg"
+deploy_package_base: https://pkgs.tailscale.com
+deploy_repository_url: >-
+  {{ deploy_package_base ~ '/' ~ deploy_channel ~ '/' ~
+    ( ansible_facts['distribution'] | lower ) }}
+deploy_aptkey_url: >-
+  {{ deploy_repository_url ~ '/' ~
+     ansible_facts['distribution_release'] ~ '.noarmor.gpg' }}
