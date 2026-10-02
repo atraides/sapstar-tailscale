@@ -46,6 +46,10 @@
          | difference(config_machine_supported_params) }}
 
 - name: Read current Tailscale status
+  become: true
+  become_exe: >-
+    {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({})) else
+    'sudo' }}
   sapstar.tailscale.status:
   register: config_machine_status
   changed_when: false
