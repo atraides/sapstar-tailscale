@@ -1,0 +1,26 @@
+# -*- mode: yaml -*-
+# vim:ts=2:sw=2:ai:si:syntax=yaml
+
+#  _____ _____ _____     _              _____     _                 _
+# |   __|  _  |  _  |___| |_ ___ ___   |   | |___| |_ _ _ _ ___ ___| |_
+# |__   |     |   __|_ -|  _| .'|  _|  | | | | -_|  _| | | | . |  _| '_|
+# |_____|__|__|__|  |___|_| |__,|_|    |_|___|___|_| |_____|___|_| |_,_|
+#               SAPstar Network - https://docs.sapstar.eu
+
+# Configuration steps for the SAPstar Network Tailscale Configuration role
+---
+- name: Configure Tailscale
+  sapstar.tailscale.config:
+    accept_dns: "{{ config_machine_params.accept_dns | default(omit) }}"
+    accept_routes: "{{ config_machine_params.accept_routes | default(omit) }}"
+    advertise_routes: >-
+      {{ config_machine_params.advertise_routes | default(omit) }}
+    auto_update: "{{ config_machine_params.auto_update | default(omit) }}"
+    snat_subnet_routes: >-
+      {{ config_machine_params.snat_subnet_routes | default(omit) }}
+    update_check: "{{ config_machine_params.update_check | default(omit) }}"
+  register: config_machine_out
+
+- name: Debug Configure Output
+  ansible.builtin.debug:
+    var: config_machine_out
