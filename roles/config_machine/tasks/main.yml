@@ -7,3 +7,12 @@
 
 - name: Configure Tailscale node
   ansible.builtin.include_tasks: configure.yml
+  when: config_machine_is_enrolled | bool
+
+- name: Skip Tailscale configuration for unenrolled node
+  ansible.builtin.debug:
+    msg: >-
+      Tailscale is not enrolled in a tailnet; configuration was skipped.
+      Current backend state:
+      {{ config_machine_status.status.backend_state | default('unknown') }}.
+  when: not config_machine_is_enrolled | bool

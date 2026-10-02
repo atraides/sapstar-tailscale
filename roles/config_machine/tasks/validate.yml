@@ -54,16 +54,11 @@
   register: config_machine_status
   changed_when: false
 
-- name: Validate Tailscale node is enrolled
-  ansible.builtin.assert:
-    that:
-      - >-
-        config_machine_status.status.backend_state
-        in config_machine_enrolled_states
-    fail_msg: >-
-      Tailscale is not enrolled in a tailnet and will not be configured.
-      Current backend state:
-      {{ config_machine_status.status.backend_state | default('unknown') }}.
+- name: Determine whether Tailscale node is enrolled
+  ansible.builtin.set_fact:
+    config_machine_is_enrolled: >-
+      {{ (config_machine_status.status.backend_state | default('NoState'))
+         in config_machine_enrolled_states }}
   vars:
     config_machine_enrolled_states:
       - Stopped
