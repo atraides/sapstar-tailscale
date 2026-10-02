@@ -1,3 +1,14 @@
+## v0.6.0 (2026-10-02)
+
+### Feat
+
+- **config**: Separate the configuration task from the main tasks to it's own space
+- **config**: Separate validation from the main task and add sensible validation before configuration
+
+### Fix
+
+- **config**: Fix incorrect parameter name to follow the standard
+
 ## v0.5.0 (2026-10-01)
 
 ### Feat
