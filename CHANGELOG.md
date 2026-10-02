@@ -1,3 +1,9 @@
+## v0.6.1 (2026-10-02)
+
+### Fix
+
+- **config**: Add privilege escalation for the appropriate configuration steps
+
 ## v0.6.0 (2026-10-02)
 
 ### Feat
