@@ -1,3 +1,9 @@
+## v0.6.2 (2026-10-02)
+
+### Fix
+
+- **enroll**: Skip configuration when the machine is not enrolled
+
 ## v0.6.1 (2026-10-02)
 
 ### Fix
