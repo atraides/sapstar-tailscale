@@ -1,0 +1,67 @@
+# -*- mode: yaml -*-
+# vim:ts=2:sw=2:ai:si:syntax=yaml
+
+#  _____ _____ _____     _              _____     _                 _
+# |   __|  _  |  _  |___| |_ ___ ___   |   | |___| |_ _ _ _ ___ ___| |_
+# |__   |     |   __|_ -|  _| .'|  _|  | | | | -_|  _| | | | . |  _| '_|
+# |_____|__|__|__|  |___|_| |__,|_|    |_|___|___|_| |_____|___|_| |_,_|
+#               SAPstar Network - https://docs.sapstar.eu
+
+# Validations for the SAPstar Network Tailscale Configuration role
+---
+- name: Validate supported platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.get("os_family") == 'Debian'
+      - ansible_facts.get("distribution_release") is defined
+    fail_msg: >-
+      The sapstar.tailscale.config_machine role currently supports Debian/Ubuntu
+      hosts with a detected distribution codename.
+
+- name: Validate configuration parameters are a mapping
+  ansible.builtin.assert:
+    that:
+      - config_machine_params is mapping
+    fail_msg: >-
+      config_machine_params must be a mapping containing the desired Tailscale
+      settings.
+
+- name: Validate configuration parameter names
+  ansible.builtin.assert:
+    that:
+      - config_machine_unsupported_params | length == 0
+    fail_msg: >-
+      Unsupported Tailscale configuration parameter(s):
+      {{ config_machine_unsupported_params | join(', ') }}
+  vars:
+    config_machine_supported_params:
+      - accept_dns
+      - accept_routes
+      - advertise_routes
+      - auto_update
+      - snat_subnet_routes
+      - update_check
+    config_machine_unsupported_params: >-
+      {{ config_machine_params.keys()
+         | difference(config_machine_supported_params) }}
+
+- name: Read current Tailscale status
+  sapstar.tailscale.status:
+  register: config_machine_status
+  changed_when: false
+
+- name: Validate Tailscale node is enrolled
+  ansible.builtin.assert:
+    that:
+      - >-
+        config_machine_status.status.backend_state
+        in config_machine_enrolled_states
+    fail_msg: >-
+      Tailscale is not enrolled in a tailnet and will not be configured.
+      Current backend state:
+      {{ config_machine_status.status.backend_state | default('unknown') }}.
+  vars:
+    config_machine_enrolled_states:
+      - Stopped
+      - Starting
+      - Running
