@@ -10,6 +10,10 @@
 # Configuration steps for the SAPstar Network Tailscale Configuration role
 ---
 - name: Configure Tailscale
+  become: true
+  become_exe: >-
+    {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({})) else
+    'sudo' }}
   sapstar.tailscale.config:
     accept_dns: "{{ config_machine_params.accept_dns | default(omit) }}"
     accept_routes: "{{ config_machine_params.accept_routes | default(omit) }}"
