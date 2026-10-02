@@ -76,7 +76,7 @@ def run_module():
     module_args = {
         "accept_dns": {"type": "bool", "required": False},
         "accept_routes": {"type": "bool", "required": False},
-        "advertise-routes": {"type": "list", "elements": "str", "required": False},
+        "advertise_routes": {"type": "list", "elements": "str", "required": False},
         "auto_update": {"type": "bool", "required": False},
         "snat_subnet_routes": {"type": "bool", "required": False},
         "update_check": {"type": "bool", "required": False},
