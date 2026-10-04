@@ -1,3 +1,4 @@
+import ipaddress
 import json
 from dataclasses import dataclass, field, fields, is_dataclass
 from enum import Enum
@@ -44,6 +45,32 @@ class TailscaleConfig:
     auto_update: bool = False
     snat_subnet_routes: bool = False
     update_check: bool = False
+
+
+def _tailscale_route_sort_key(route: str) -> tuple[int, int, int, int]:
+    """Return the ordering key used by Tailscale for advertised routes.
+
+    Tailscale sorts routes by prefix length, address family, and then the
+    numeric network address. Invalid routes are kept after valid routes so
+    Tailscale can report the validation error itself when the setting is
+    applied.
+    """
+    try:
+        network = ipaddress.ip_network(route, strict=True)
+    except ValueError:
+        return (1, 0, 0, 0)
+
+    return (
+        0,
+        network.prefixlen,
+        network.version,
+        int(network.network_address),
+    )
+
+
+def sort_tailscale_routes(routes: list[str]) -> list[str]:
+    """Sort advertised routes in the same order as Tailscale."""
+    return sorted(routes, key=_tailscale_route_sort_key)
 
 
 def as_result_data(value: Any) -> Any:
@@ -103,6 +130,10 @@ class TailscaleInstance:
             for key, value in desired_config.items()
             if value is not None
         }
+        if "advertise_routes" in normalized_config:
+            normalized_config["advertise_routes"] = sort_tailscale_routes(
+                normalized_config["advertise_routes"]
+            )
 
         return {
             key: value
