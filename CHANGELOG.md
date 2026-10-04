@@ -1,3 +1,9 @@
+## v0.6.3 (2026-10-04)
+
+### Fix
+
+- **config**: Make sure the advertised route list is sorted the same way as Tailscale's
+
 ## v0.6.2 (2026-10-02)
 
 ### Fix
