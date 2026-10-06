@@ -11,23 +11,18 @@
       The sapstar.tailscale.install role currently supports Debian/Ubuntu
       hosts with a detected distribution codename.
 
-- name: Configure the signed Tailscale repository and package
-  ansible.builtin.include_tasks: repository.yml
-  args:
-    apply:
-      become: true
-      become_exe: >-
-        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
-        else 'sudo' }}
+- name: Configure Tailscale repository and install package
+  become: true
+  become_exe: >-
+    {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
+    else 'sudo' }}
+  when: deploy_enabled | bool
+  block:
+    - name: Configure the signed Tailscale repository and package
+      ansible.builtin.include_tasks: repository.yml
 
-- name: Install the Tailscale package
-  ansible.builtin.include_tasks: install.yml
-  args:
-    apply:
-      become: true
-      become_exe: >-
-        {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
-        else 'sudo' }}
+    - name: Install the Tailscale package
+      ansible.builtin.include_tasks: install.yml
 
 - name: Enroll to Tailscale
   ansible.builtin.include_tasks: enroll.yml

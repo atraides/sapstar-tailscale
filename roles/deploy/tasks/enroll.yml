@@ -1,4 +1,13 @@
 ---
+- name: Update the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Verify that the tailscale package is deployed
+  ansible.builtin.assert:
+    that:
+      - "'tailscale' in ansible_facts.packages"
+
 - name: Enroll local machine to Tailscale
   when: >
     deploy_enroll_key is defined

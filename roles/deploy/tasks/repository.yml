@@ -1,5 +1,9 @@
 ---
 - name: Install APT HTTPS prerequisites
+  become: true
+  become_exe: >-
+    {{ 'sudo.ws' if 'sudo-rs' in (ansible_facts.packages | default({}))
+    else 'sudo' }}
   ansible.builtin.apt:
     name: "{{ deploy_apt_packages }}"
     state: present
