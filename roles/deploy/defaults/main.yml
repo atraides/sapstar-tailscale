@@ -1,4 +1,5 @@
 ---
+deploy_enabled: false
 deploy_enroll_key: null
 deploy_package_version: null
 deploy_raspbian: false
