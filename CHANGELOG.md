@@ -1,3 +1,13 @@
+## v1.0.0 (2026-10-06)
+
+### BREAKING CHANGE
+
+- This is a breaking change because in the previous iteration the apt package was always installed when the role was included. In this version the default is no installation and requires changes to the playbooks.
+
+### Feat
+
+- **core**: Add an option to manually enable the package install
+
 ## v0.6.3 (2026-10-04)
 
 ### Fix
